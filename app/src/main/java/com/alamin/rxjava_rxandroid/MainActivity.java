@@ -11,6 +11,7 @@ import com.alamin.rxjava_rxandroid.pojo.Task;
 import com.alamin.rxjava_rxandroid.service.DataSource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -45,7 +46,53 @@ public class MainActivity extends AppCompatActivity {
         //Operators
         //createOperator();
        // rangeOperator();
-        repeatOperator();
+       // repeatOperator();
+        intervalAndTimerOperator();
+    }
+
+    private void intervalAndTimerOperator() {
+
+        //For Interval
+      /*  Observable<Long> longObservable = Observable
+                .interval(1, TimeUnit.SECONDS)
+                .takeWhile(new Predicate<Long>() {
+                    @Override
+                    public boolean test(@androidx.annotation.NonNull Long aLong) throws Exception {
+                        return aLong<=5;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+*/
+        Observable<Long> longObservable = Observable
+                .timer(5, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+
+        longObservable.subscribe(new Observer<Long>() {
+            @Override
+            public void onSubscribe(@androidx.annotation.NonNull Disposable disposable) {
+
+            }
+
+            @Override
+            public void onNext(@androidx.annotation.NonNull Long aLong) {
+                Log.d(TAG, "onNext: "+ aLong);
+
+            }
+
+            @Override
+            public void onError(@androidx.annotation.NonNull Throwable throwable) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+
     }
 
     private void repeatOperator() {
