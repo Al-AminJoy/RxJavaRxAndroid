@@ -17,7 +17,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
@@ -44,10 +43,52 @@ public class MainActivity extends AppCompatActivity {
         seekBar=findViewById(R.id.seekBar);
         //observable();
         //Operators
+
+        //Create
         //createOperator();
        // rangeOperator();
        // repeatOperator();
-        intervalAndTimerOperator();
+        //intervalAndTimerOperator();
+
+        //Distinct
+        distinctOperator();
+    }
+
+    private void distinctOperator() {
+        Observable<Task> taskObservable = Observable
+                .fromIterable(DataSource.createTasksList())
+                .distinct(new Function<Task, String>() {
+                    @Override
+                    public String apply(@androidx.annotation.NonNull Task task) throws Exception {
+                        return task.getDescription();
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+
+        taskObservable.subscribe(new Observer<Task>() {
+            @Override
+            public void onSubscribe(@androidx.annotation.NonNull Disposable disposable) {
+
+            }
+
+            @Override
+            public void onNext(@androidx.annotation.NonNull Task task) {
+                Log.d(TAG, "onNext: "+ task.getDescription());
+
+            }
+
+            @Override
+            public void onError(@androidx.annotation.NonNull Throwable throwable) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+
     }
 
     private void intervalAndTimerOperator() {
