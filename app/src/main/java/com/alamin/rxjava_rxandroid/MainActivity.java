@@ -134,6 +134,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void distinctOperator() {
+        /**
+         * Finding Unique Item By Type
+         */
         Observable<Task> taskObservable = Observable
                 .fromIterable(DataSource.createTasksList())
                 .distinct(new Function<Task, String>() {
