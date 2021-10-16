@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.alamin.rxjava_rxandroid.pojo.Task;
 import com.alamin.rxjava_rxandroid.service.DataSource;
+import com.jakewharton.rxbinding3.view.RxView;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,12 +25,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import kotlin.Unit;
 
 public class MainActivity extends AppCompatActivity {
     private TextView textView;
     private SeekBar seekBar;
     private String TAG="main_activity";
-    private CompositeDisposable disposable=new CompositeDisposable();
+    private CompositeDisposable disposables=new CompositeDisposable();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +41,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        textView=findViewById(R.id.textView);
-        seekBar=findViewById(R.id.seekBar);
+        //textView=findViewById(R.id.textView);
+        //seekBar=findViewById(R.id.seekBar);
         //observable();
         //Operators
 
@@ -51,7 +53,84 @@ public class MainActivity extends AppCompatActivity {
         //intervalAndTimerOperator();
 
         //Distinct
-        distinctOperator();
+        //distinctOperator();
+        //simpleBufferOperator();
+        advancedBufferOperator();
+    }
+
+    private void advancedBufferOperator() {
+        /**
+         * Counts How Many Clicks In 4 Second
+         * Actually This Is Creating a List and We Are Checking The Size of That List
+         */
+        RxView.clicks(findViewById(R.id.button))
+                .map(new Function<Unit, Object>() {
+                    @Override
+                    public Object apply(@androidx.annotation.NonNull Unit unit) throws Exception {
+                        return 1;
+                    }
+                })
+                .buffer(4,TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Object>>() {
+                    @Override
+                    public void onSubscribe(@androidx.annotation.NonNull Disposable disposable) {
+                        disposables.add(disposable);
+                    }
+
+                    @Override
+                    public void onNext(@androidx.annotation.NonNull List<Object> objects) {
+                        Log.d(TAG, "onNext: You clicked " + objects.size() + " times in 4 seconds!");
+
+                    }
+
+                    @Override
+                    public void onError(@androidx.annotation.NonNull Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private void simpleBufferOperator() {
+        /**
+         * Creates Bundle of Object
+         */
+        Observable<Task> taskObservable = Observable
+                .fromIterable(DataSource.createTasksList())
+                .subscribeOn(Schedulers.io());
+        taskObservable
+        .buffer(2)
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Observer<List<Task>>() {
+            @Override
+            public void onSubscribe(@androidx.annotation.NonNull Disposable disposable) {
+
+            }
+
+            @Override
+            public void onNext(@androidx.annotation.NonNull List<Task> tasks) {
+                Log.d(TAG, "onNext: bundle results: -------------------");
+                for(Task task: tasks){
+                    Log.d(TAG, "onNext: " + task.getDescription());
+                }
+            }
+
+            @Override
+            public void onError(@androidx.annotation.NonNull Throwable throwable) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+     ;
     }
 
     private void distinctOperator() {
@@ -272,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
                 Log.d(TAG, "onSubscribe Called ");
-                disposable.add(d);
+                disposables.add(d);
             }
 
             @Override
@@ -296,6 +375,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        disposable.clear();
+        disposables.clear();
     }
 }
